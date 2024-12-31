@@ -1,0 +1,112 @@
+@using Proyecto_TallerII.Repositories
+@using Proyecto_TallerII.ViewModels
+@model ListaTablerosViewModel
+@{
+    var esAdmin = Autorizaciones.EsAdmin(ViewContext.HttpContext);
+    var idUsuarioLogueado = Autorizaciones.ObtenerIdUsuario(ViewContext.HttpContext);
+}
+
+<section class="w-[83%] h-full mx-auto mt-5 flex gap-4">
+    <!-- Contenedor de Mis Tableros -->
+    <div class="w-1/2 p-4">
+        <h2 class="text-white bg-[#8c52ff] text-center text-3xl font-bold py-5 rounded-t-3xl">Mis Tableros</h2>
+        <div class="bg-[#f2f2f2] text-black rounded-lg p-4 space-y-4 overflow-y-auto h-[600px]">
+            @if (Model.ListaTablerosVM.Count > 0)
+            {
+                bool noHay = true;
+                @foreach (var tablero in Model.ListaTablerosVM)
+                {
+                    @if (tablero.IdUsuarioPropietarioVM == idUsuarioLogueado)
+                    {
+                        <div class="border-2 border-[#8c52ff]/60 rounded-3xl p-4">
+                            <div class="flex justify-between">
+                                <a asp-controller="Tarea" asp-action="Index" asp-route-idTablero="@tablero.IdTableroVM"
+                                    class="text-[#3b3b3b] font-bold text-3xl underline">@tablero.NombreTableroVM</a>
+                                <span class="flex">
+                                    <p class="text-[#8c52ff] text-xl font-semibold mt-2 pr-2 underline">Propietario:</p>
+                                    <p class="text-[#4d4d4d] text-lg font-semibold mt-2">Yo</p>
+                                </span>
+                            </div>
+                            <div class="mt-2 flex items-center">
+                                <div class="bg-purple-200 h-4 flex-1 rounded-full overflow-hidden">
+                                    <div class="bg-purple-600 h-full"
+                                        style="width: @(tablero.CantidadTareasRealizadasVM * 100 / ((tablero.CantidadTareasVM == 0) ? 1 : tablero.CantidadTareasVM))%;">
+                                    </div>
+                                </div>
+                                <span class="flex ml-4 text-lg font-bold">(@tablero.CantidadTareasRealizadasVM<p>/</p>
+                                    @tablero.CantidadTareasVM) Tareas</span>
+                            </div>
+                            <p class="text-[#4d4d4d]/90 text-lg font-bold">@tablero.DescripcionTableroVM</p>
+                        </div>
+                        noHay = false;
+                    }
+                }
+                @if (noHay)
+                {
+                    <p class="text-[#3b3b3b] text-lg text-center font-bold">No hay tableros disponibles.</p>
+                }
+            }
+            else
+            {
+                <p class="text-[#3b3b3b] text-lg text-center font-bold">No hay tableros disponibles.</p>
+            }
+        </div>
+        <div
+            class="text-white bg-[#8c52ff] flex justify-center items-center text-[1.30rem] font-bold h-[55px] rounded-b-3xl">
+            <a asp-controller="Tablero" asp-action="CrearTablero" class="underline">+ Crear Tablero</a>
+        </div>
+    </div>
+
+    <!-- Contenedor de Tableros Ajenos -->
+    <div class="w-1/2 p-4">
+        <h2 class="text-white bg-[#8c52ff] text-center text-3xl font-bold py-5 rounded-t-3xl">Tableros Ajenos</h2>
+        <div class="bg-[#f2f2f2] text-black rounded-lg p-4 space-y-4 overflow-y-auto h-[600px]">
+            @if (Model.ListaTablerosVM.Count > 0)
+            {
+                bool noHay = true;
+                @foreach (var tablero in Model.ListaTablerosVM)
+                {
+                    @if (tablero.IdUsuarioPropietarioVM != idUsuarioLogueado)
+                    {
+                        <div class="border-2 border-[#8c52ff]/60 rounded-3xl p-4">
+                            <div class="flex justify-between">
+                                <a asp-controller="Tarea" asp-action="Index" asp-route-idTablero="@tablero.IdTableroVM"
+                                    class="text-[#3b3b3b] font-bold text-3xl underline">@tablero.NombreTableroVM</a>
+                                <span class="flex">
+                                    <p class="text-[#8c52ff] text-xl font-semibold mt-2 pr-2 underline">Propietario:</p>
+                                    <p class="text-[#4d4d4d] text-lg font-semibold mt-2">@tablero.NombrePropietarioTableroVM</p>
+                                </span>
+                            </div>
+                            <div class="mt-2 flex items-center">
+                                <div class="bg-purple-200 h-4 flex-1 rounded-full overflow-hidden">
+                                    <div class="bg-purple-600 h-full"
+                                        style="width: @(tablero.CantidadTareasRealizadasVM * 100 / ((tablero.CantidadTareasVM == 0) ? 1 : tablero.CantidadTareasVM))%;">
+                                    </div>
+                                </div>
+                                <span class="flex ml-4 text-lg font-bold">(@tablero.CantidadTareasRealizadasVM<p>/</p>
+                                    @tablero.CantidadTareasVM) Tareas</span>
+                            </div>
+                            <p class="text-[#4d4d4d]/90 text-lg font-bold">@tablero.DescripcionTableroVM</p>
+                        </div>
+                        noHay = false;
+                    }
+                }
+                @if (noHay)
+                {
+                    <p class="text-[#3b3b3b] text-lg text-center font-bold">No hay tableros disponibles.</p>
+                }
+            }
+            else
+            {
+                <p class="text-[#3b3b3b] text-lg text-center font-bold">No hay tableros disponibles.</p>
+            }
+        </div>
+        <div
+            class="text-white bg-[#8c52ff] flex justify-center items-center text-[1.30rem] font-bold h-[55px] rounded-b-3xl">
+            @if (esAdmin)
+            {
+                <a asp-controller="Tablero" asp-action="CrearTableroAjeno" class="underline">+ Crear Tablero Ajeno</a>
+            }
+        </div>
+    </div>
+</section>

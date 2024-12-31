@@ -1,0 +1,41 @@
+@using Proyecto_TallerII.ViewModels
+@model LoginViewModel
+
+<section class="flex flex-col justify-center items-center flex-grow w-full min-h-[calc(100vh-20vh)]">
+    @if (TempData["Mensaje"] != null)
+    {
+        <div class="relative px-4 py-3 mt-1 text-white bg-[#8c52ff] border border-[#8c52ff] rounded" role="alert">
+            <strong class="font-bold">@TempData["Mensaje"]</strong>
+        </div>
+    }
+
+    <div class="flex flex-col justify-center items-center w-full flex-grow">
+        <h1 class="text-[#3b3b3b] text-[40px] font-bold mb-8">Login</h1>
+        <form asp-controller="Login" asp-action="Index" method="post" class="space-y-8 w-full max-w-[400px]">
+            <div class="mb-4 relative">
+                <input type="text" asp-for="@Model.NombreUsuario"
+                    class="form-control text-[#3b3b3b] text-[18px] font-bold placeholder-[#4d4d4d] placeholder:text-[18px] placeholder:font-bold bg-[#f2f2f2] border-2 px-4 border-[#8c52ff] rounded-[18px] w-full h-[50px] focus:outline-none focus:border-[#8c52ff] focus:bg-[#f2f2f2] focus:placeholder-[#3b3b3b] focus:text-[#3b3b3b] focus:font-bold focus:text-[18px]"
+                    placeholder="Usuario..." />
+                <span asp-validation-for="@Model.NombreUsuario"
+                    class="absolute left-0 top-full mt-1 ml-2 text-[#CC7A00] w-full block text-sm font-bold">
+                </span>
+            </div>
+            <div class="mb-4 relative">
+                <input type="password" asp-for="@Model.Password"
+                    class="form-control text-[#3b3b3b] text-[18px] font-bold placeholder-[#4d4d4d] placeholder:text-[18px] placeholder:font-bold bg-[#f2f2f2] border-2 px-4 border-[#8c52ff] rounded-[18px] w-full h-[50px] focus:outline-none focus:border-[#8c52ff] focus:bg-[#f2f2f2] focus:placeholder-[#3b3b3b] focus:text-[#3b3b3b] focus:font-bold focus:text-[18px]"
+                    placeholder="Contraseña..." />
+                <span asp-validation-for="@Model.Password"
+                    class="absolute left-0 top-full mt-1 ml-2 text-[#CC7A00] w-full block text-sm font-bold">
+                </span>
+            </div>
+            <div>
+                <button type="submit"
+                    class="bg-[#8c52ff] text-white text-[22px] font-bold border-2 border-[#8c52ff] rounded-[18px] w-full h-[50px]"
+                >Iniciar Sesión</button>
+            </div>
+        </form>
+    </div>
+</section>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

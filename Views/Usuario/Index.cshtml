@@ -1,0 +1,47 @@
+@using Proyecto_TallerII.Repositories
+@using Proyecto_TallerII.ViewModels
+@model ListaUsuariosViewModel
+
+<section class="w-full flex flex-col justify-center items-center flex-grow min-h-[calc(100vh-20vh)]">
+    <h2 class="text-center text-[#3b3b3b] text-4xl font-bold my-3 underline">Lista de Usuarios</h2>
+    <div
+        class="w-2/5 bg-[#f2f2f2] text-black border-2 border-[#8c52ff]/60 p-4 space-y-4 overflow-y-auto h-[700px] rounded-3xl">
+        @if (Model.ListaUsuariosVM.Count > 0)
+        {
+            @foreach (var u in Model.ListaUsuariosVM)
+            {
+                if(u.IdUsuario != Autorizaciones.ObtenerIdUsuario(ViewContext.HttpContext))
+                {
+                    <div class="flex justify-between border-2 border-[#8c52ff]/60 rounded-3xl py-4 px-5">
+                        <div class="flex gap-2">
+                            <a asp-controller="Usuario" asp-action="Perfil" asp-route-idUsuario="@u.IdUsuario"
+                                class="text-[#3b3b3b] text-xl font-bold underline">
+                                @u.NombreUsuario</a>
+                            <a asp-controller="Usuario" asp-action="Perfil" asp-route-idUsuario="@u.IdUsuario"
+                                class="text-[#8c52ff] text-xl font-bold underline">
+                                (@u.RolUsuario)</a>
+                        </div>
+                        <div class="flex gap-2">
+                            <a asp-controller="Usuario" asp-action="EditarUsuario" asp-route-idUsuario="@u.IdUsuario"
+                                class="border-2 border-[#8c52ff] rounded-[15px] text-[#3b3b3b] font-bold underline decoration-[1.5px] px-3 hover:bg-[#8c52ff] hover:text-white transition-colors duration-300">
+                                Editar</a>
+                            <a asp-controller="Usuario" asp-action="EliminarUsuario" asp-route-idUsuario="@u.IdUsuario"
+                                class="text-[#3b3b3b] font-bold underline decoration-[1.5px] mt-[2px] transition-colors duration-200 hover:text-[#8c52ff]"
+                                onclick="return confirm('¿Estas seguro que quieres eliminar el usuario: @(u.NombreUsuario)?')"
+                                >Eliminar</a>
+                        </div>
+                    </div>
+                }
+            }
+        }
+        else
+        {
+            <p class="text-[#3b3b3b] text-lg text-center font-bold">No hay usuarios disponibles.</p>
+        }
+    </div>
+    <div class="flex flex-col items-center mt-3">
+        <a asp-controller="Tablero" asp-action="Index" 
+            class="text-[#3b3b3b] text-[25px] font-bold underline hover:text-[#8c52ff]"
+        >Volver al Inicio</a>
+    </div>
+</section>

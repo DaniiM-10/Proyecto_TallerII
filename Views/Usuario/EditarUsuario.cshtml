@@ -1,0 +1,50 @@
+@using Proyecto_TallerII.Models
+@using Proyecto_TallerII.Repositories
+@using Proyecto_TallerII.ViewModels
+@model EditarUsuarioViewModel
+
+<section class="w-full flex flex-col justify-center items-center flex-grow min-h-[calc(100vh-20vh)]">
+    <div class="flex flex-col justify-center items-center w-full flex-grow">
+        <h1 class="text-[#3b3b3b] text-[40px] font-bold mb-8">Editar Usuario: <span
+                class="text-[#8c52ff]">@Model.NombreUsuario</span></h1>
+        <form asp-controller="Usuario" asp-action="EditarUsuario" method="post" class="space-y-8 w-full max-w-[400px]">
+            <input asp-for="@Model.IdUsuario" type="hidden" />
+            <div class="mb-4 relative">
+                <input type="text" asp-for="@Model.NombreUsuario"
+                    class="form-control text-[#3b3b3b] text-[18px] font-bold placeholder-[#4d4d4d] placeholder:text-[18px] placeholder:font-bold bg-[#f2f2f2] border-2 px-4 border-[#8c52ff] rounded-[18px] w-full h-[50px] focus:outline-none focus:border-[#8c52ff] focus:bg-[#f2f2f2] focus:placeholder-[#3b3b3b] focus:text-[#3b3b3b] focus:font-bold focus:text-[18px]"
+                    placeholder="Nombre..." />
+                <span asp-validation-for="@Model.NombreUsuario" 
+                    class="absolute left-0 top-full mt-1 ml-2 text-[#CC7A00] w-full block text-sm font-bold">
+                </span>
+            </div>
+            <div class="mb-4 relative">
+                <input type="password"  asp-for="@Model.Password"
+                    class="form-control text-[#3b3b3b] text-[18px] font-bold placeholder-[#4d4d4d] placeholder:text-[18px] placeholder:font-bold bg-[#f2f2f2] border-2 px-4 border-[#8c52ff] rounded-[18px] w-full h-[50px] focus:outline-none focus:border-[#8c52ff] focus:bg-[#f2f2f2] focus:placeholder-[#3b3b3b] focus:text-[#3b3b3b] focus:font-bold focus:text-[18px]"
+                    placeholder="Contraseña..." />
+            </div>
+            @if (Autorizaciones.EsAdmin(ViewContext.HttpContext))
+            {
+                <div class="mb-4 relative">
+                    <select asp-for="@Model.RolUsuario"
+                        class="form-control text-[#3b3b3b] text-[18px] font-bold placeholder-[#4d4d4d] placeholder:text-[18px] placeholder:font-bold bg-[#f2f2f2] border-2 px-4 border-[#8c52ff] rounded-[18px] w-full h-[50px] focus:outline-none focus:border-[#8c52ff] focus:bg-[#f2f2f2] focus:placeholder-[#3b3b3b] focus:text-[#3b3b3b] focus:font-bold focus:text-[18px]">
+                        <!option value="1" @(Model.RolUsuario == Rol.Administrador ? "selected" : "") >Administrador</!option>
+                        <!option value="2" @(Model.RolUsuario == Rol.Operador ? "selected" : "") >Operador</!option>
+                    </select>
+                </div>
+            } else {
+                <input asp-for="@Model.RolUsuario" type="hidden" value="@Model.RolUsuario" />
+            }
+            <div class="flex flex-col items-center gap-3">
+                <button type="submit"
+                    class="bg-[#8c52ff] text-white text-[22px] font-bold border-2 border-[#8c52ff] rounded-[18px] w-full h-[50px]">Editar
+                    Usuario</button>
+                <a asp-controller="Usuario" asp-action="Perfil" asp-route-idUsuario="@Model.IdUsuario"
+                    class="text-[#3b3b3b] text-[25px] font-bold underline hover:text-[#8c52ff]"
+                >Volver al Perfil</a>
+            </div>
+        </form>
+    </div>
+</section>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

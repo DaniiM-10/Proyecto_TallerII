@@ -1,0 +1,505 @@
+@using Proyecto_TallerII.Repositories
+@using Proyecto_TallerII.ViewModels
+@model ListaTareasViewModel
+@{
+    var esAdmin = Autorizaciones.EsAdmin(ViewContext.HttpContext);
+    var idUsuarioLogueado = Autorizaciones.ObtenerIdUsuario(ViewContext.HttpContext);
+}
+
+<section 
+    class="w-[83%] h-full mx-auto flex flex-col"
+> 
+    <div 
+        class="flex justify-center items-center mt-4 my-3 gap-4"
+    >
+        <h1 
+            class="text-[#3b3b3b] text-4xl font-bold underline"
+        >@Model.NombreTablero</h1>
+        @if(Model.IdUsuarioPropietario == idUsuarioLogueado || esAdmin)
+        {
+            <a asp-controller="Tablero" asp-action="EditarTablero" asp-route-idTablero="@Model.IdTablero" asp-route-idUsuarioProp="@Model.IdUsuarioPropietario"
+                class="border-2 border-[#8c52ff] rounded-[15px] text-[#3b3b3b] font-bold underline decoration-[1.5px] px-3 hover:bg-[#8c52ff] hover:text-white transition-colors duration-300">
+            Editar</a>
+            <a asp-controller="Tablero" asp-action="EliminarTablero" asp-route-idTablero="@Model.IdTablero" asp-route-idUsuarioProp="@Model.IdUsuarioPropietario"
+                class="text-[#3b3b3b] font-bold underline decoration-[1.5px] transition-colors duration-200 hover:text-[#8c52ff]"
+                onclick="return confirm('¿Estas seguro que quieres eliminar el tablero: @(Model.NombreTablero)?')"
+            >Eliminar</a>
+        }
+    </div>
+    <div class="flex">
+        <!-- Contenedor TODO -->
+        <div class="w-1/4 p-4">
+            <h2 
+                class="text-white bg-[#737373] text-center text-[2.50rem] font-bold py-3 rounded-t-3xl"
+            >ToDo</h2>
+            <div 
+                class="bg-[#f2f2f2] text-black rounded-lg p-4 space-y-4 overflow-y-auto h-[600px]"
+            >
+                @if (Model.ListaTareasVM == null || Model.ListaTareasVM.Count > 0)
+                {
+                    @foreach (var todo in Model.ListaTareasVM)
+                    {
+                        if(todo.EstadoTareaVM == EstadoTarea.ToDo)
+                        {
+                            <div 
+                                class="border-2 border-[#@todo.ColorTareaVM]/60 rounded-3xl py-4 px-4"
+                            >
+                                <div class="flex justify-between">
+                                    <!-- Aquí agregamos el evento onclick -->
+                                    <p 
+                                        class="text-[#3b3b3b] font-bold text-xl underline cursor-pointer hover:text-[#8c52ff]"
+                                        onclick="openModal(
+                                            (@esAdmin.ToString().ToLower() || @(Model.IdUsuarioPropietario??0) == @idUsuarioLogueado),
+                                            '@todo.NombreTareaVM', 
+                                            '@todo.DescripcionTareaVM', 
+                                            '@todo.NombreUsuarioAsignadoVM', 
+                                            '@Model.NombreTablero', 
+                                            @todo.IdTareaVM,
+                                            @todo.IdTableroVM
+                                        )"
+                                    >@todo.NombreTareaVM
+                                    </p>
+                                    @if(esAdmin || Model.IdUsuarioPropietario == idUsuarioLogueado)
+                                    {
+                                        <figure 
+                                            class="flex pl-2 pt-1"
+                                        >
+                                            <a asp-controller="Tarea" asp-action="AsignarCambiarUsuarioTarea" asp-route-idTablero="@todo.IdTableroVM" asp-route-idTarea="@todo.IdTareaVM">
+                                            @if(todo.IdUsuarioAsignadoVM > 0)
+                                            {
+                                                <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#8c52ff"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M11 14C7.13401 14 4 17.134 4 21H10.5M18.5 20.2361C17.9692 20.7111 17.2684 21 16.5 21C14.8431 21 13.5 19.6569 13.5 18C13.5 16.3431 14.8431 15 16.5 15C17.8062 15 18.9175 15.8348 19.3293 17M20 14.5V17.5H17M15 7C15 9.20914 13.2091 11 11 11C8.79086 11 7 9.20914 7 7C7 4.79086 8.79086 3 11 3C13.2091 3 15 4.79086 15 7Z" stroke="#8c52ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+                                            } else {
+                                                <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#6cbd4a"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M20 18L14 18M17 15V21M4 21C4 17.134 7.13401 14 11 14C11.695 14 12.3663 14.1013 13 14.2899M15 7C15 9.20914 13.2091 11 11 11C8.79086 11 7 9.20914 7 7C7 4.79086 8.79086 3 11 3C13.2091 3 15 4.79086 15 7Z" stroke="#6cbd4a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+                                            }
+                                            </a>
+                                        </figure>
+                                    }
+                                </div>
+                                <div 
+                                    class="mt-2 flex items-center"
+                                >
+                                    <span 
+                                        class="flex text-lg font-bold"
+                                    >
+                                        <p class="text-[#8c52ff] pr-1">Para: </p>
+                                        <p class="text-[#4d4d4d] underline">@todo.NombreUsuarioAsignadoVM</p>
+                                    </span>
+                                </div>
+                                <p 
+                                    class="text-[#4d4d4d]/90 text-lg pt-1 font-bold overflow-hidden text-ellipsis whitespace-nowrap"
+                                >@todo.DescripcionTareaVM</p>
+                                @if((esAdmin || (Model.IdUsuarioPropietario == idUsuarioLogueado || todo.IdUsuarioAsignadoVM == idUsuarioLogueado)) && todo.IdUsuarioAsignadoVM != null)
+                                {
+                                    <div id="estado-container" 
+                                        class="hidden" data-estado-de-tarea="@todo.EstadoTareaVM"
+                                    ></div>
+                                    <form asp-controller="Tarea" asp-action="CambiarEstado" method="post" 
+                                        class="flex justify-end items-center gap-2 w-[100%]" style="margin-bottom: -1rem;"
+                                    >
+                                        <span id="color-estado">
+                                            <svg width="24px" height="24px" viewBox="-1.6 -1.6 19.20 19.20" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#@todo.ColorTareaVM"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <circle cx="8" cy="8" r="8" fill="#@todo.ColorTareaVM"></circle> </g></svg>
+                                        </span>
+                                        <input type="hidden" name="IdTablero" id="id-tablero-hidden" value="@todo.IdTableroVM">
+                                        <input type="hidden" name="IdTarea" id="id-tarea-hidden" value="@todo.IdTareaVM">
+                                        <input type="hidden" name="IdPropietarioTablero" id="id-tablero-prop-hidden" value="@Model.IdUsuarioPropietario">
+                                        <input type="hidden" name="IdUsuarioAsignado" id="id-usuario-hidden" value="@todo.IdUsuarioAsignadoVM">
+                                        <div class="mb-2">
+                                            <label for="EstadoTarea" 
+                                                class="sr-only"
+                                            >Estado de la Tarea</label>
+                                            <select name="EstadoTarea" id="estado-tarea-select"
+                                                class="form-control text-[#3b3b3b] text-[18px] font-bold mt-2 placeholder-[#4d4d4d] placeholder:text-[18px] placeholder:font-bold bg-[#f2f2f2] border-2 px-4 border-[#8c52ff] rounded-[18px] w-full h-[30px] focus:outline-none focus:border-[#8c52ff] focus:bg-[#f2f2f2] focus:placeholder-[#3b3b3b] focus:text-[#3b3b3b] focus:font-bold focus:text-[18px]">
+                                            </select>
+                                            <span class="text-[#CC7A00] w-full block px-3"></span>
+                                        </div>
+                                        <button type="submit" >
+                                            <svg fill="#8c52ff" width="22px" height="22px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" stroke="#8c52ff"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M4,12a1,1,0,0,1-2,0A9.983,9.983,0,0,1,18.242,4.206V2.758a1,1,0,1,1,2,0v4a1,1,0,0,1-1,1h-4a1,1,0,0,1,0-2h1.743A7.986,7.986,0,0,0,4,12Zm17-1a1,1,0,0,0-1,1A7.986,7.986,0,0,1,7.015,18.242H8.757a1,1,0,1,0,0-2h-4a1,1,0,0,0-1,1v4a1,1,0,0,0,2,0V19.794A9.984,9.984,0,0,0,22,12,1,1,0,0,0,21,11Z"></path></g></svg>
+                                        </button>
+                                    </form>
+                                }
+                            </div>
+                        }
+                    }
+                }
+                else
+                {
+                    <p 
+                        class="text-[#3b3b3b] text-lg text-center font-bold"
+                    >No hay tareas disponibles.</p>
+                }
+            </div>
+            <div 
+                class="text-white bg-[#8c52ff] flex justify-center items-center text-[1.30rem] font-bold h-[55px] rounded-b-3xl"
+            >
+                @if(esAdmin || Model.IdUsuarioPropietario == idUsuarioLogueado)
+                {
+                    <a asp-controller="Tarea" asp-action="CrearTarea" asp-route-idTablero="@Model.IdTablero" 
+                        class="underline"
+                    >+ Crear Tarea</a>
+                }
+            </div>
+        </div>
+
+        <!-- Contenedor DOING -->
+        <div class="w-1/4 p-4">
+            <h2 
+                class="text-white bg-[#8c52ff] text-center text-[2.50rem] font-bold py-3 rounded-t-3xl"
+            >Doing</h2>
+            <div 
+                class="bg-[#f2f2f2] text-black rounded-lg p-4 space-y-4 overflow-y-auto h-[600px]"
+            >
+                @if (Model.ListaTareasVM == null || Model.ListaTareasVM.Count > 0)
+                {
+                    @foreach (var doing in Model.ListaTareasVM)
+                    {
+                        if(doing.EstadoTareaVM == EstadoTarea.Doing)
+                        {
+                            <div 
+                                class="border-2 border-[#@doing.ColorTareaVM]/60 rounded-3xl py-4 px-4"
+                            >
+                                <div class="flex justify-between">
+                                    <!-- Aquí agregamos el evento onclick -->
+                                    <p 
+                                        class="text-[#3b3b3b] font-bold text-xl underline cursor-pointer hover:text-[#8c52ff]"
+                                        onclick="openModal(
+                                            (@esAdmin.ToString().ToLower() || @(Model.IdUsuarioPropietario??0) == @idUsuarioLogueado),
+                                            '@doing.NombreTareaVM', 
+                                            '@doing.DescripcionTareaVM', 
+                                            '@doing.NombreUsuarioAsignadoVM', 
+                                            '@Model.NombreTablero', 
+                                            @doing.IdTareaVM,
+                                            @doing.IdTableroVM
+                                        )"
+                                    >@doing.NombreTareaVM
+                                    </p>
+                                    
+                                    @if(esAdmin || Model.IdUsuarioPropietario == idUsuarioLogueado)
+                                    {
+                                        <a asp-controller="Tarea" asp-action="AsignarCambiarUsuarioTarea" asp-route-idTablero="@doing.IdTableroVM" asp-route-idTarea="@doing.IdTareaVM">
+                                            <figure 
+                                                class="flex pl-2 pt-1"
+                                            >
+                                                <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#8c52ff"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M11 14C7.13401 14 4 17.134 4 21H10.5M18.5 20.2361C17.9692 20.7111 17.2684 21 16.5 21C14.8431 21 13.5 19.6569 13.5 18C13.5 16.3431 14.8431 15 16.5 15C17.8062 15 18.9175 15.8348 19.3293 17M20 14.5V17.5H17M15 7C15 9.20914 13.2091 11 11 11C8.79086 11 7 9.20914 7 7C7 4.79086 8.79086 3 11 3C13.2091 3 15 4.79086 15 7Z" stroke="#8c52ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+                                            </figure>
+                                        </a>
+                                    }
+                                </div>
+                                <div 
+                                    class="mt-2 flex items-center"
+                                >
+                                    <span class="flex text-lg font-bold">
+                                        <p class="text-[#8c52ff] pr-1">Para: </p>
+                                        <p class="text-[#4d4d4d] underline">@doing.NombreUsuarioAsignadoVM</p>
+                                    </span>
+                                </div>
+                                <p 
+                                    class="text-[#4d4d4d]/90 text-lg pt-1 font-bold overflow-hidden text-ellipsis whitespace-nowrap"
+                                >@doing.DescripcionTareaVM</p>
+                                @if((esAdmin || (Model.IdUsuarioPropietario == idUsuarioLogueado || doing.IdUsuarioAsignadoVM == idUsuarioLogueado)) && doing.IdUsuarioAsignadoVM != null)
+                                {
+                                    <div id="estado-container" 
+                                        class="hidden" data-estado-de-tarea="@doing.EstadoTareaVM"
+                                    ></div>
+                                    <form asp-controller="Tarea" asp-action="CambiarEstado" method="post" 
+                                        class="flex justify-end items-center gap-2 w-[100%]" style="margin-bottom: -1rem;"
+                                    >
+                                        <span id="color-estado">
+                                            <svg width="24px" height="24px" viewBox="-1.6 -1.6 19.20 19.20" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#@doing.ColorTareaVM"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <circle cx="8" cy="8" r="8" fill="#@doing.ColorTareaVM"></circle> </g></svg>
+                                        </span>
+                                        <input type="hidden" name="IdTablero" id="id-tablero-hidden" value="@doing.IdTableroVM">
+                                        <input type="hidden" name="IdTarea" id="id-tarea-hidden" value="@doing.IdTareaVM">
+                                        <input type="hidden" name="IdPropietarioTablero" id="id-tablero-prop-hidden" value="@Model.IdUsuarioPropietario">
+                                        <input type="hidden" name="IdUsuarioAsignado" id="id-usuario-hidden" value="@doing.IdUsuarioAsignadoVM">
+                                        <div class="mb-2">
+                                            <label for="EstadoTarea" 
+                                                class="sr-only"
+                                            >Estado de la Tarea</label>
+                                            <select name="EstadoTarea" id="estado-tarea-select"
+                                                class="form-control text-[#3b3b3b] text-[18px] font-bold mt-2 placeholder-[#4d4d4d] placeholder:text-[18px] placeholder:font-bold bg-[#f2f2f2] border-2 px-4 border-[#8c52ff] rounded-[18px] w-full h-[30px] focus:outline-none focus:border-[#8c52ff] focus:bg-[#f2f2f2] focus:placeholder-[#3b3b3b] focus:text-[#3b3b3b] focus:font-bold focus:text-[18px]">
+                                            </select>
+                                            <span class="text-[#CC7A00] w-full block px-3"></span>
+                                        </div>
+                                        <button type="submit" >
+                                            <svg fill="#8c52ff" width="22px" height="22px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" stroke="#8c52ff"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M4,12a1,1,0,0,1-2,0A9.983,9.983,0,0,1,18.242,4.206V2.758a1,1,0,1,1,2,0v4a1,1,0,0,1-1,1h-4a1,1,0,0,1,0-2h1.743A7.986,7.986,0,0,0,4,12Zm17-1a1,1,0,0,0-1,1A7.986,7.986,0,0,1,7.015,18.242H8.757a1,1,0,1,0,0-2h-4a1,1,0,0,0-1,1v4a1,1,0,0,0,2,0V19.794A9.984,9.984,0,0,0,22,12,1,1,0,0,0,21,11Z"></path></g></svg>
+                                        </button>
+                                    </form>
+                                }
+                            </div>
+                        }
+                    }
+                }
+                else
+                {
+                    <p 
+                        class="text-[#3b3b3b] text-lg text-center font-bold"
+                    >No hay tareas disponibles.</p>
+                }
+            </div>
+            <div 
+                class="text-white bg-[#8c52ff] flex justify-center items-center text-[1.30rem] font-bold h-[55px] rounded-b-3xl"
+            >
+            </div>
+        </div>
+
+        <!-- Contenedor REVIEW -->
+        <div class="w-1/4 p-4">
+            <h2 
+                class="text-white bg-[#ffbd59] text-center text-[2.50rem] font-bold py-3 rounded-t-3xl"
+            >Review</h2>
+            <div 
+                class="bg-[#f2f2f2] text-black rounded-lg p-4 space-y-4 overflow-y-auto h-[600px]"
+            >
+                @if (Model.ListaTareasVM == null || Model.ListaTareasVM.Count > 0)
+                {
+                    @foreach (var review in Model.ListaTareasVM)
+                    {
+                        if(review.EstadoTareaVM == EstadoTarea.Review)
+                        {
+                            <div 
+                                class="border-2 border-[#@review.ColorTareaVM]/60 rounded-3xl py-4 px-4"
+                            >
+                                <div class="flex justify-between">
+                                    <!-- Aquí agregamos el evento onclick -->
+                                    <p 
+                                        class="text-[#3b3b3b] font-bold text-xl underline cursor-pointer hover:text-[#8c52ff]"
+                                        onclick="openModal(
+                                            (@esAdmin.ToString().ToLower() || @(Model.IdUsuarioPropietario??0) == @idUsuarioLogueado),
+                                            '@review.NombreTareaVM', 
+                                            '@review.DescripcionTareaVM', 
+                                            '@review.NombreUsuarioAsignadoVM', 
+                                            '@Model.NombreTablero', 
+                                            @review.IdTareaVM,
+                                            @review.IdTableroVM
+                                            )"
+                                    >@review.NombreTareaVM
+                                    </p>
+                                    @if(esAdmin || Model.IdUsuarioPropietario == idUsuarioLogueado)
+                                    {
+                                        <a asp-controller="Tarea" asp-action="AsignarCambiarUsuarioTarea" asp-route-idTablero="@review.IdTableroVM" asp-route-idTarea="@review.IdTareaVM">
+                                            <figure 
+                                                class="flex pl-2 pt-1"
+                                            >
+                                                <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#8c52ff"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M11 14C7.13401 14 4 17.134 4 21H10.5M18.5 20.2361C17.9692 20.7111 17.2684 21 16.5 21C14.8431 21 13.5 19.6569 13.5 18C13.5 16.3431 14.8431 15 16.5 15C17.8062 15 18.9175 15.8348 19.3293 17M20 14.5V17.5H17M15 7C15 9.20914 13.2091 11 11 11C8.79086 11 7 9.20914 7 7C7 4.79086 8.79086 3 11 3C13.2091 3 15 4.79086 15 7Z" stroke="#8c52ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+                                            </figure>
+                                        </a>
+                                    }
+                                </div>
+                                <div 
+                                    class="mt-2 flex items-center"
+                                >
+                                    <span class="flex text-lg font-bold">
+                                        <p class="text-[#8c52ff] pr-1">Para: </p>
+                                        <p class="text-[#4d4d4d] underline">@review.NombreUsuarioAsignadoVM</p>
+                                    </span>
+                                </div>
+                                <p 
+                                    class="text-[#4d4d4d]/90 text-lg pt-1 font-bold overflow-hidden text-ellipsis whitespace-nowrap"
+                                >@review.DescripcionTareaVM</p>
+                                @if((esAdmin || (Model.IdUsuarioPropietario == idUsuarioLogueado || review.IdUsuarioAsignadoVM == idUsuarioLogueado)) && review.IdUsuarioAsignadoVM != null)
+                                {
+                                    <div id="estado-container" 
+                                        class="hidden" data-estado-de-tarea="@review.EstadoTareaVM"
+                                    ></div>
+                                    <form asp-controller="Tarea" asp-action="CambiarEstado" method="post" 
+                                        class="flex justify-end items-center gap-2 w-[100%]" style="margin-bottom: -1rem;"
+                                    >
+                                        <span id="color-estado">
+                                            <svg width="24px" height="24px" viewBox="-1.6 -1.6 19.20 19.20" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#@review.ColorTareaVM"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <circle cx="8" cy="8" r="8" fill="#@review.ColorTareaVM"></circle> </g></svg>
+                                        </span>
+                                        <input type="hidden" name="IdTablero" id="id-tablero-hidden" value="@review.IdTableroVM">
+                                        <input type="hidden" name="IdTarea" id="id-tarea-hidden" value="@review.IdTareaVM">
+                                        <input type="hidden" name="IdPropietarioTablero" id="id-tablero-prop-hidden" value="@Model.IdUsuarioPropietario">
+                                        <input type="hidden" name="IdUsuarioAsignado" id="id-usuario-hidden" value="@review.IdUsuarioAsignadoVM">
+                                        <div class="mb-2">
+                                            <label for="EstadoTarea" 
+                                                class="sr-only"
+                                            >Estado de la Tarea</label>
+                                            <select name="EstadoTarea" id="estado-tarea-select"
+                                                class="form-control text-[#3b3b3b] text-[18px] font-bold mt-2 placeholder-[#4d4d4d] placeholder:text-[18px] placeholder:font-bold bg-[#f2f2f2] border-2 px-4 border-[#8c52ff] rounded-[18px] w-full h-[30px] focus:outline-none focus:border-[#8c52ff] focus:bg-[#f2f2f2] focus:placeholder-[#3b3b3b] focus:text-[#3b3b3b] focus:font-bold focus:text-[18px]">
+                                            </select>
+                                            <span class="text-[#CC7A00] w-full block px-3"></span>
+                                        </div>
+                                        <button type="submit" >
+                                            <svg fill="#8c52ff" width="22px" height="22px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" stroke="#8c52ff"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M4,12a1,1,0,0,1-2,0A9.983,9.983,0,0,1,18.242,4.206V2.758a1,1,0,1,1,2,0v4a1,1,0,0,1-1,1h-4a1,1,0,0,1,0-2h1.743A7.986,7.986,0,0,0,4,12Zm17-1a1,1,0,0,0-1,1A7.986,7.986,0,0,1,7.015,18.242H8.757a1,1,0,1,0,0-2h-4a1,1,0,0,0-1,1v4a1,1,0,0,0,2,0V19.794A9.984,9.984,0,0,0,22,12,1,1,0,0,0,21,11Z"></path></g></svg>
+                                        </button>
+                                    </form>
+                                }
+                            </div>
+                        }
+                    }
+                }
+                else
+                {
+                    <p 
+                        class="text-[#3b3b3b] text-lg text-center font-bold"
+                    >No hay tareas disponibles.</p>
+                }
+            </div>
+            <div 
+                class="text-white bg-[#8c52ff] flex justify-center items-center text-[1.30rem] font-bold h-[55px] rounded-b-3xl"
+            >
+            </div>
+        </div>
+
+        <!-- Contenedor DONE -->
+        <div class="w-1/4 p-4">
+            <h2 
+                class="text-white bg-[#6cbd4a] text-center text-[2.50rem] font-bold py-3 rounded-t-3xl"
+            >Done</h2>
+            <div 
+                class="bg-[#f2f2f2] text-black rounded-lg p-4 space-y-4 overflow-y-auto h-[600px]"
+            >
+                @if (Model.ListaTareasVM == null || Model.ListaTareasVM.Count > 0)
+                {
+                    @foreach (var done in Model.ListaTareasVM)
+                    {
+                        if(done.EstadoTareaVM == EstadoTarea.Done)
+                        {
+                            <div 
+                                class="border-2 border-[#@done.ColorTareaVM]/60 rounded-3xl py-4 px-4">
+                                <div class="flex justify-between">
+                                    <!-- Aquí agregamos el evento onclick -->
+                                    <p 
+                                        class="text-[#3b3b3b] font-bold text-xl underline cursor-pointer hover:text-[#8c52ff]"
+                                        onclick="openModal(
+                                            (@esAdmin.ToString().ToLower() || @(Model.IdUsuarioPropietario??0) == @idUsuarioLogueado),
+                                            '@done.NombreTareaVM', 
+                                            '@done.DescripcionTareaVM', 
+                                            '@done.NombreUsuarioAsignadoVM', 
+                                            '@Model.NombreTablero', 
+                                            @done.IdTareaVM,
+                                            @done.IdTableroVM
+                                        )"
+                                    >@done.NombreTareaVM
+                                    </p>
+                                    @if(esAdmin || Model.IdUsuarioPropietario == idUsuarioLogueado)
+                                    {
+                                        <a asp-controller="Tarea" asp-action="AsignarCambiarUsuarioTarea" asp-route-idTablero="@done.IdTableroVM" asp-route-idTarea="@done.IdTareaVM">
+                                            <figure 
+                                                class="flex pl-2 pt-1"
+                                            >
+                                                <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#8c52ff"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M11 14C7.13401 14 4 17.134 4 21H10.5M18.5 20.2361C17.9692 20.7111 17.2684 21 16.5 21C14.8431 21 13.5 19.6569 13.5 18C13.5 16.3431 14.8431 15 16.5 15C17.8062 15 18.9175 15.8348 19.3293 17M20 14.5V17.5H17M15 7C15 9.20914 13.2091 11 11 11C8.79086 11 7 9.20914 7 7C7 4.79086 8.79086 3 11 3C13.2091 3 15 4.79086 15 7Z" stroke="#8c52ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+                                            </figure>
+                                        </a>
+                                    }
+                                </div>
+                                <div 
+                                    class="mt-2 flex items-center"
+                                >
+                                    <span class="flex text-lg font-bold">
+                                        <p class="text-[#8c52ff] pr-1">Para: </p>
+                                        <p class="text-[#4d4d4d] underline">@done.NombreUsuarioAsignadoVM</p>
+                                    </span>
+                                </div>
+                                <p 
+                                    class="text-[#4d4d4d]/90 text-lg pt-1 font-bold overflow-hidden text-ellipsis whitespace-nowrap"
+                                >@done.DescripcionTareaVM</p>
+                                @if((esAdmin || (Model.IdUsuarioPropietario == idUsuarioLogueado || done.IdUsuarioAsignadoVM == idUsuarioLogueado)) && done.IdUsuarioAsignadoVM != null)
+                                {
+                                    <div id="estado-container" 
+                                        class="hidden" data-estado-de-tarea="@done.EstadoTareaVM"
+                                    ></div>
+                                    <form asp-controller="Tarea" asp-action="CambiarEstado" method="post" 
+                                        class="flex justify-end items-center gap-2 w-[100%]" style="margin-bottom: -1rem;"
+                                    >
+                                        <span id="color-estado">
+                                            <svg width="24px" height="24px" viewBox="-1.6 -1.6 19.20 19.20" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#@done.ColorTareaVM"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <circle cx="8" cy="8" r="8" fill="#@done.ColorTareaVM"></circle> </g></svg>
+                                        </span>
+                                        <input type="hidden" name="IdTablero" id="id-tablero-hidden" value="@done.IdTableroVM">
+                                        <input type="hidden" name="IdTarea" id="id-tarea-hidden" value="@done.IdTareaVM">
+                                        <input type="hidden" name="IdPropietarioTablero" id="id-tablero-prop-hidden" value="@Model.IdUsuarioPropietario">
+                                        <input type="hidden" name="IdUsuarioAsignado" id="id-usuario-hidden" value="@done.IdUsuarioAsignadoVM">
+                                        <div class="mb-2">
+                                            <label for="EstadoTarea" 
+                                                class="sr-only"
+                                            >Estado de la Tarea</label>
+                                            <select name="EstadoTarea" id="estado-tarea-select"
+                                                class="form-control text-[#3b3b3b] text-[18px] font-bold mt-2 placeholder-[#4d4d4d] placeholder:text-[18px] placeholder:font-bold bg-[#f2f2f2] border-2 px-4 border-[#8c52ff] rounded-[18px] w-full h-[30px] focus:outline-none focus:border-[#8c52ff] focus:bg-[#f2f2f2] focus:placeholder-[#3b3b3b] focus:text-[#3b3b3b] focus:font-bold focus:text-[18px]">
+                                            </select>
+                                            <span class="text-[#CC7A00] w-full block px-3"></span>
+                                        </div>
+                                        <button type="submit" >
+                                            <svg fill="#8c52ff" width="22px" height="22px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" stroke="#8c52ff"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M4,12a1,1,0,0,1-2,0A9.983,9.983,0,0,1,18.242,4.206V2.758a1,1,0,1,1,2,0v4a1,1,0,0,1-1,1h-4a1,1,0,0,1,0-2h1.743A7.986,7.986,0,0,0,4,12Zm17-1a1,1,0,0,0-1,1A7.986,7.986,0,0,1,7.015,18.242H8.757a1,1,0,1,0,0-2h-4a1,1,0,0,0-1,1v4a1,1,0,0,0,2,0V19.794A9.984,9.984,0,0,0,22,12,1,1,0,0,0,21,11Z"></path></g></svg>
+                                        </button>
+                                    </form>
+                                }
+                            </div>
+                        }
+                    }
+                }
+                else
+                {
+                    <p 
+                        class="text-[#3b3b3b] text-lg text-center font-bold"
+                    >No hay tareas disponibles.</p>
+                }
+            </div>
+            <div 
+                class="text-white bg-[#8c52ff] flex justify-center items-center text-[1.30rem] font-bold h-[55px] rounded-b-3xl"
+            >
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Modal -->
+<div id="tareaModal" 
+    class="fixed inset-0 bg-black/60 flex items-center justify-center hidden"
+>
+    <div 
+        class="bg-[#f2f2f2] rounded-lg p-6 w-[50%] py-3"
+    >
+        <div 
+            class="flex justify-end items-center"
+        >
+            <button onclick="closeModal()" 
+                class="text-xl font-bold"
+            >✖</button>
+        </div>
+        <div class="my-4">
+            <div class="flex justify-between">
+                <div>
+                    <h2 id="modal-nombre-tarea"
+                        class="text-[#3b3b3b] text-4xl font-bold underline pb-1"
+                    ></h2>
+                    <p id="modal-nombre-tablero"
+                        class="text-[#8c52ff] text-2xl font-bold"
+                    ></p>
+                </div>
+                <div class="flex gap-1 font-bold mx-5 mt-3">
+                    <p 
+                        class="text-[#8c52ff] text-xl underline"
+                    >Para:</p>
+                    <p id="modal-usuario-asignado"
+                        class="text-[#3b3b3b] text-xl"
+                    ></p>
+                </div>
+            </div>
+            <div class="mt-4">
+                <p id="modal-descripcion"
+                    class="text-[#3b3b3b] text-xl font-bold"
+                ></p>
+            </div>
+            @if(esAdmin || Model.IdUsuarioPropietario == idUsuarioLogueado)
+            {
+                <div 
+                    class="border-b-2 border-[#8c52ff]/50 my-4"
+                ></div>
+                <div 
+                    class="flex justify-between items-center">
+                    <div id="modal-btns" class="flex gap-2">
+                        <a id="modal-editar" asp-controller="Tarea" asp-action="EditarTarea"
+                            class="border-2 border-[#8c52ff] rounded-[15px] text-[#3b3b3b] font-bold underline decoration-[1.5px] px-3 hover:bg-[#8c52ff] hover:text-white transition-colors duration-300">
+                            Editar
+                        </a>
+                        <a id="modal-eliminar" asp-controller="Tarea" asp-action="EliminarTarea"
+                            class="text-[#3b3b3b] font-bold underline decoration-[1.5px] mt-[3px] transition-colors duration-200 hover:text-[#8c52ff]" 
+                            onclick="return confirm('¿Estas seguro que quieres eliminar esta tarea?')">
+                            Eliminar
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
