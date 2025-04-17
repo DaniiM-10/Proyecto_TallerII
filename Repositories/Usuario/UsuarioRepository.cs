@@ -1,5 +1,6 @@
 using Microsoft.Data.Sqlite;
 using Proyecto_TallerII.Models;
+using Proyecto_TallerII.Helpers;
 namespace Proyecto_TallerII.Repositories;
 
 public class UsuarioRepository : IUsuarioRepository
@@ -38,7 +39,7 @@ public class UsuarioRepository : IUsuarioRepository
             }
         }
     }
-    public void EditarUsuario(int idUsuario, Usuario usuario)
+    public void EditarUsuario(Usuario usuario)
     {   
         string query;
         if(usuario.Password == null) 
@@ -60,7 +61,7 @@ public class UsuarioRepository : IUsuarioRepository
                     command.Parameters.AddWithValue("@passwordU", usuario.Password);
                 }
                 command.Parameters.AddWithValue("@rolU", usuario.RolUsuario);
-                command.Parameters.AddWithValue("@idU", idUsuario);
+                command.Parameters.AddWithValue("@idU", usuario.IdUsuario);
                 command.ExecuteNonQuery();
             }
             catch (Exception ex)
@@ -76,8 +77,6 @@ public class UsuarioRepository : IUsuarioRepository
     }
     public void EliminarUsuario(int idUsuario)
     {
-        var queryTableros = "UPDATE Tablero SET id_usuario_propietario = NULL WHERE id_usuario_propietario = @idU;";
-        var queryTareas = "UPDATE Tarea SET estado = 1, color = '737373', id_usuario_asignado = NULL WHERE id_usuario_asignado = @idU;";
         var query = "DELETE FROM Usuario WHERE id = @idU;";
 
         using (SqliteConnection connection = new SqliteConnection(connectionString))
@@ -87,17 +86,6 @@ public class UsuarioRepository : IUsuarioRepository
             {
                 try
                 {
-                    // Actualizar Tableros
-                    var commandTableros = new SqliteCommand(queryTableros, connection, transaction);
-                    commandTableros.Parameters.AddWithValue("@idU", idUsuario);
-                    commandTableros.ExecuteNonQuery();
-
-                    // Actualizar Tareas
-                    var commandTareas = new SqliteCommand(queryTareas, connection, transaction);
-                    commandTareas.Parameters.AddWithValue("@idU", idUsuario);
-                    commandTareas.ExecuteNonQuery();
-
-                    // Eliminar Usuario
                     var commandUsuario = new SqliteCommand(query, connection, transaction);
                     commandUsuario.Parameters.AddWithValue("@idU", idUsuario);
                     commandUsuario.ExecuteNonQuery();
@@ -107,7 +95,7 @@ public class UsuarioRepository : IUsuarioRepository
                 catch (SqliteException ex)
                 {
                     _logger.LogError(LoggerMsj.MensajeEx(ex, "Error al interactuar con la base de datos en EliminarUsuario."));
-                    transaction.Rollback(); // Revertir cambios si hay un error
+                    transaction.Rollback();
                     throw new Exception("Hubo un problema con la consulta a la base de datos.", ex);
                 }
                 finally
@@ -234,7 +222,6 @@ public class UsuarioRepository : IUsuarioRepository
                             {
                                 IdUsuario = Convert.ToInt32(reader["id"]),
                                 NombreUsuario = reader["nombre_de_usuario"].ToString()!,
-                                Password = reader["password"].ToString()!, 
                                 RolUsuario = (Rol)Convert.ToInt32(reader["rol_usuario"])
                             };
                         }

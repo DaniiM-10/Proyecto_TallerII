@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using Proyecto_TallerII.Models;
 namespace Proyecto_TallerII.ViewModels;
 
 public class CrearTableroViewModel
@@ -10,7 +9,7 @@ public class CrearTableroViewModel
     [Required(ErrorMessage = "La descripcion del tablero es requerida.")]
     public string DescripcionDeTablero { get; set; }
     
-    public int? IdUsuarioPropietario { get; set; }
+    public int IdUsuarioPropietario { get; set; }
 
     public CrearTableroViewModel() {}
 }

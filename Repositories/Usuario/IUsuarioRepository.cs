@@ -4,7 +4,7 @@ namespace Proyecto_TallerII.Repositories;
 public interface IUsuarioRepository
 {
     void CrearUsuario(Usuario usuario);
-    void EditarUsuario(int idUsuario, Usuario usuario);
+    void EditarUsuario(Usuario usuario);
     void EliminarUsuario(int idUsuario);
     List<Usuario> ObtenerTodosLosUsuarios();
     Usuario ObtenerUsuarioPorId(int idUsuario);

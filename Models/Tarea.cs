@@ -1,3 +1,5 @@
+using Proyecto_TallerII.ViewModels;
+
 namespace Proyecto_TallerII.Models;
 
 public enum EstadoTarea
@@ -19,21 +21,31 @@ public class Tarea
     public string ColorTarea { get; set; }
 
     public Tarea() {}
+    public Tarea(CrearTareaViewModel crearTareaViewModel) {
+        IdTablero = crearTareaViewModel.IdTablero;
+        NombreTarea = crearTareaViewModel.NombreTarea;
+        EstadoTarea = crearTareaViewModel.EstadoTarea;
+        IdUsuarioAsignado = crearTareaViewModel.IdUsuarioAsignado;
+        DescripcionTarea = crearTareaViewModel.DescripcionTarea;
+        ColorTarea = crearTareaViewModel.ColorTarea;
+    }
+    public Tarea(EditarTareaViewModel editarTareaViewModel) {
+        IdTablero = editarTareaViewModel.IdTablero;
+        IdTarea = editarTareaViewModel.IdTarea;
+        IdUsuarioAsignado = editarTareaViewModel.IdUsuarioAsignado;
+        NombreTarea = editarTareaViewModel.NombreTarea;
+        DescripcionTarea = editarTareaViewModel.DescripcionTarea;
+    }
     
-    public string ObtenerColorPorEstado(EstadoTarea estado)
+    public static string ObtenerColorPorEstado(EstadoTarea estado)
     {
-        switch (estado)
+        return estado switch
         {
-            case EstadoTarea.ToDo:
-                return "737373";
-            case EstadoTarea.Doing:
-                return "8c52ff";
-            case EstadoTarea.Review:
-                return "ffbd59";
-            case EstadoTarea.Done:
-                return "6cbd4a";
-            default:
-                return "41b8d5";
-        }
+            EstadoTarea.ToDo => "737373",
+            EstadoTarea.Doing => "8c52ff",
+            EstadoTarea.Review => "ffbd59",
+            EstadoTarea.Done => "6cbd4a",
+            _ => "41b8d5" //color predeterminado
+        };
     }
 }

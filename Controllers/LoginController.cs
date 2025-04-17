@@ -1,7 +1,7 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Proyecto_TallerII.Models;
 using Proyecto_TallerII.Repositories;
+using Proyecto_TallerII.Helpers;
 using Proyecto_TallerII.ViewModels;
 namespace Proyecto_TallerII.Controllers;
 
@@ -19,54 +19,48 @@ public class LoginController : Controller
     {
         try
         {
-            if(Autorizaciones.EstaAutenticado(HttpContext)) 
+            if(!AuthHelper.EstaAutenticado(HttpContext)) 
             {
-                _logger.LogInformation(LoggerMsj.MensajeInfoWarn("Accediendo al método Index del controlador Login."));
-                return RedirectToAction("Index", "Tablero");
+                _logger.LogWarning(LoggerMsj.MensajeInfoWarn("Acceso no autenticado al método Index del controlador Login."));
+                return View(new LoginViewModel());
             }
-            return View(new LoginViewModel());
+
+            _logger.LogInformation(LoggerMsj.MensajeInfoWarn("Accediendo al método Index del controlador Login."));
+            return RedirectToAction("Index", "Tablero");
         }
         catch (Exception ex)
         {
             _logger.LogError(LoggerMsj.MensajeEx(ex, "Error al acceder al método Index del controlador Login."));
-            return BadRequest();
+            return StatusCode(500);
         }
     }
     [HttpPost]
     public IActionResult Index(LoginViewModel loginViewModel)
     {
-        if(Autorizaciones.EstaAutenticado(HttpContext)) 
-        {
-            return RedirectToAction("Index", "Tablero");
-        }
-        if (!ModelState.IsValid) 
-        {
-            TempData["Mensaje"] = "Por favor, complete todos los campos.";
-            _logger.LogWarning(LoggerMsj.MensajeInfoWarn("ModelState no válido en el método Index del controlador Login."));
-            return View("Index", loginViewModel);
-        }
-
         try
         {
+            if (!ModelState.IsValid) 
+            {
+                TempData["Mensaje"] = "Por favor, complete todos los campos.";
+                _logger.LogWarning(LoggerMsj.MensajeInfoWarn("ModelState no válido en el método Index del controlador Login."));
+                return View(loginViewModel);
+            }
+
             var usuarioLogin = _usuarioRepository.ObtenerUsuarioPorCredenciales(loginViewModel.NombreUsuario!, loginViewModel.Password!);
             if (usuarioLogin == null)
             {
                 TempData["Mensaje"] = "Credenciales inválidas. Intente nuevamente.";
                 _logger.LogWarning(LoggerMsj.MensajeInfoWarn($"Intento de acceso inválido - Usuario: {loginViewModel.NombreUsuario}"));
-                return View("Index", loginViewModel);
+                return View(loginViewModel);
             }
-            else
-            {
-                LogearUsuario(usuarioLogin);
-                _logger.LogInformation(LoggerMsj.MensajeInfoWarn($"El usuario {loginViewModel.NombreUsuario} ingreso correctamente!"));
-                return RedirectToAction("Index", "Home");
-            }
+            
+            LogearUsuario(usuarioLogin);
+            return RedirectToAction("Index", "Home");
         }
         catch (Exception ex)
         {
-            TempData["Mensaje"] = "Ocurrió un error al procesar la solicitud. Por favor, inténtalo nuevamente más tarde.";
             _logger.LogError(LoggerMsj.MensajeEx(ex, "Ocurrió un error al procesar la solicitud. Por favor, inténtalo nuevamente más tarde."));
-            return View("Index", loginViewModel);
+            return StatusCode(500);
         }   
     }
     
@@ -75,10 +69,12 @@ public class LoginController : Controller
     {
         try
         {
-            if(!Autorizaciones.EstaAutenticado(HttpContext)) 
+            if(!AuthHelper.EstaAutenticado(HttpContext)) 
             {
+                _logger.LogWarning(LoggerMsj.MensajeInfoWarn("Intento de cerrar sesión sin estar autenticado."));
                 return RedirectToAction("Index");
             }
+
             HttpContext.Session.Clear();
             TempData["Mensaje"] = "¡La sesión se cerró exitosamente!";
             _logger.LogInformation(LoggerMsj.MensajeInfoWarn("La sesión se cerró exitosamente para el usuario."));
@@ -86,13 +82,12 @@ public class LoginController : Controller
         }
         catch (Exception ex)
         {
-            TempData["Mensaje"] = "Ocurrió un error al cerrar sesión. Por favor, inténtalo nuevamente más tarde.";
             _logger.LogError(LoggerMsj.MensajeEx(ex, "Ocurrió un error al cerrar sesión. Por favor, inténtalo nuevamente más tarde."));
-            return RedirectToAction("Index");
+            return StatusCode(500);
         }
     }
 
-    // FUNCIONES AUXILIARES
+    
     private void LogearUsuario(Usuario usuario)
     {
         try

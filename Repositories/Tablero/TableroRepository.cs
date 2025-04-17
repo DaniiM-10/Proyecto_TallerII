@@ -1,5 +1,6 @@
 using Microsoft.Data.Sqlite;
 using Proyecto_TallerII.Models;
+using Proyecto_TallerII.Helpers;
 namespace Proyecto_TallerII.Repositories;
 
 public class TableroRepository : ITableroRepository
@@ -14,15 +15,8 @@ public class TableroRepository : ITableroRepository
 
     public void CrearTablero(Tablero tablero)
     {
-        string query;
-        if(tablero.IdUsuarioPropietario == null)
-        {
-            query = @"INSERT INTO Tablero (nombre, descripcion) 
-                    VALUES (@nombreT, @descripcionT);";
-        } else {
-            query = @"INSERT INTO Tablero (id_usuario_propietario, nombre, descripcion) 
+        string query = @"INSERT INTO Tablero (id_usuario_propietario, nombre, descripcion) 
                     VALUES (@idPropietarioT, @nombreT, @descripcionT);";
-        }
         
         using (SqliteConnection connection = new SqliteConnection(connectionString))
         {
@@ -30,10 +24,7 @@ public class TableroRepository : ITableroRepository
             {
                 connection.Open();
                 var command = new SqliteCommand(query, connection);
-                if(tablero.IdUsuarioPropietario != null)
-                {
-                    command.Parameters.Add(new SqliteParameter("@idPropietarioT", tablero.IdUsuarioPropietario));
-                }
+                command.Parameters.Add(new SqliteParameter("@idPropietarioT", tablero.IdUsuarioPropietario));
                 command.Parameters.Add(new SqliteParameter("@nombreT", tablero.NombreTablero));
                 command.Parameters.Add(new SqliteParameter("@descripcionT", tablero.DescripcionTablero));
                 command.ExecuteNonQuery();
@@ -51,15 +42,8 @@ public class TableroRepository : ITableroRepository
     }
     public void EditarTablero(Tablero tablero)
     {
-        string query = "";
-        if(tablero.IdUsuarioPropietario == null)
-        {
-            query = @"UPDATE Tablero SET nombre = @nombreT, descripcion = @descripcionT 
-                WHERE id = @idTablero;";
-        } else {
-            query = @"UPDATE Tablero SET id_usuario_propietario = @idPropietarioT, nombre = @nombreT, descripcion = @descripcionT 
-                WHERE id = @idTablero;";
-        }
+        string query = @"UPDATE Tablero SET id_usuario_propietario = @idPropietarioT, nombre = @nombreT, descripcion = @descripcionT 
+                    WHERE id = @idTablero;";
 
         using (SqliteConnection connection = new SqliteConnection(connectionString))
         {
@@ -67,10 +51,7 @@ public class TableroRepository : ITableroRepository
             {
                 connection.Open();
                 var command = new SqliteCommand(query, connection);
-                if(tablero.IdUsuarioPropietario != null)
-                {
-                    command.Parameters.Add(new SqliteParameter("@idPropietarioT", tablero.IdUsuarioPropietario));
-                }
+                command.Parameters.Add(new SqliteParameter("@idPropietarioT", tablero.IdUsuarioPropietario));
                 command.Parameters.Add(new SqliteParameter("@nombreT", tablero.NombreTablero));
                 command.Parameters.Add(new SqliteParameter("@descripcionT", tablero.DescripcionTablero));
                 command.Parameters.Add(new SqliteParameter("@idTablero", tablero.IdTablero));
@@ -143,9 +124,7 @@ public class TableroRepository : ITableroRepository
                     {
                         tablero = new Tablero();
                         tablero.IdTablero = Convert.ToInt32(reader["id"]);
-                        tablero.IdUsuarioPropietario = reader["id_usuario_propietario"] == DBNull.Value
-                                ? (int?)null
-                                : Convert.ToInt32(reader["id_usuario_propietario"]);
+                        tablero.IdUsuarioPropietario = Convert.ToInt32(reader["id_usuario_propietario"]);
                         tablero.NombreTablero = reader["nombre"].ToString()!;
                         tablero.DescripcionTablero = reader["descripcion"].ToString()!;
                     }
@@ -195,9 +174,7 @@ public class TableroRepository : ITableroRepository
                         var tablero = new Tablero
                         {
                             IdTablero = Convert.ToInt32(reader["id"]),
-                            IdUsuarioPropietario = reader["id_usuario_propietario"] == DBNull.Value
-                                ? (int?)null
-                                : Convert.ToInt32(reader["id_usuario_propietario"]),
+                            IdUsuarioPropietario = Convert.ToInt32(reader["id_usuario_propietario"]),
                             NombreTablero = reader["nombre"]?.ToString()!,
                             DescripcionTablero = reader["descripcion"]?.ToString()!
                         };
@@ -257,10 +234,7 @@ public class TableroRepository : ITableroRepository
                         var tablero = new Tablero
                         {
                             IdTablero = Convert.ToInt32(reader["id"]),
-                            IdUsuarioPropietario = reader["id_usuario_propietario"] == DBNull.Value
-                                ? (int?)null
-                                : Convert.ToInt32(reader["id_usuario_propietario"]),
-                            
+                            IdUsuarioPropietario = Convert.ToInt32(reader["id_usuario_propietario"]),
                             NombreTablero = reader["nombre"].ToString()!,
                             DescripcionTablero = reader["descripcion"].ToString()!
                         };
@@ -289,10 +263,6 @@ public class TableroRepository : ITableroRepository
     }
     public bool ExisteTablero(string nombreDeTablero, int idTablero)
     {
-        if(nombreDeTablero == null) {
-            return true;
-        }
-        
         var query = "SELECT Tablero.nombre FROM Tablero WHERE nombre = @nombreT AND id != @idT;";
 
         bool existe = false;

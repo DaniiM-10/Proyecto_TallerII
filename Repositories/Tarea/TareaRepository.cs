@@ -1,5 +1,6 @@
 using Microsoft.Data.Sqlite;
 using Proyecto_TallerII.Models;
+using Proyecto_TallerII.Helpers;
 namespace Proyecto_TallerII.Repositories;
 
 public class TareaRepository : ITareaRepository
@@ -159,15 +160,17 @@ public class TareaRepository : ITareaRepository
     public List<Tarea> ListarTareasDeUsuario(int idUsuario, bool sa)
     {
         string query;
-        if(sa) // para traer las Sin Asignar de los tableros de un usuario en particular
+        if(sa) // para traer las tareas (Sin Asignar) de los tableros de un usuario en particular
         {
             query = @"SELECT Tarea.id, Tarea.id_tablero, Tarea.nombre, Tarea.estado, Tarea.descripcion, Tarea.color, Tarea.id_usuario_asignado 
-                    FROM Tarea INNER JOIN Tablero ON Tarea.id_tablero = Tablero.id
+                    FROM Tarea 
+                    INNER JOIN Tablero ON Tarea.id_tablero = Tablero.id
                     INNER JOIN Usuario ON Tablero.id_usuario_propietario = Usuario.id
                     WHERE Tarea.id_usuario_asignado IS NULL AND Usuario.id = @id_usuario;";
-        } else {
+        } else { // obtengo las tareas asignadas o sin asignar de un usuario en particular
             query = @"SELECT Tarea.id, Tarea.nombre, Tarea.descripcion, Tarea.estado, Tarea.color, Tarea.id_tablero, Tarea.id_usuario_asignado 
-                    FROM Tarea INNER JOIN Tablero ON Tarea.id_tablero = Tablero.id
+                    FROM Tarea 
+                    INNER JOIN Tablero ON Tarea.id_tablero = Tablero.id
                     WHERE id_usuario_asignado = @id_usuario";
         }
 
@@ -441,9 +444,8 @@ public class TareaRepository : ITareaRepository
         }
         return cantidad_tareas_realizadas;
     }
-    public void CambiarPropietarioTarea(int idUsuario, int idTarea)
+    public void CambiarPropietarioTarea(int? idUsuario, int idTarea)
     {
-
         var query = @"UPDATE Tarea SET id_usuario_asignado = @idUsuarioAsignado WHERE id = @idTarea;";
 
         using (SqliteConnection connection = new SqliteConnection(connectionString))
@@ -452,7 +454,7 @@ public class TareaRepository : ITareaRepository
             {
                 connection.Open();
                 var command = new SqliteCommand(query, connection);
-                command.Parameters.Add(new SqliteParameter("@idUsuarioAsignado", idUsuario));
+                command.Parameters.Add(new SqliteParameter("@idUsuarioAsignado", idUsuario ?? (object)DBNull.Value));
                 command.Parameters.Add(new SqliteParameter("@idTarea", idTarea));
                 command.ExecuteNonQuery();
                 connection.Close();

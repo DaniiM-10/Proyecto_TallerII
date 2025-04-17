@@ -1,7 +1,5 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using Proyecto_TallerII.Models;
-using Proyecto_TallerII.Repositories;
+using Proyecto_TallerII.Helpers;
 namespace Proyecto_TallerII.Controllers;
 
 public class HomeController : Controller
@@ -17,7 +15,7 @@ public class HomeController : Controller
     {
         try
         {
-            if (!Autorizaciones.EstaAutenticado(HttpContext))
+            if (!AuthHelper.EstaAutenticado(HttpContext))
             {
                 _logger.LogInformation(LoggerMsj.MensajeInfoWarn("Intento de acceso sin autenticación al método Index del controlador Home. Redirigiendo al login."));
                 return RedirectToAction("Index", "Login");
@@ -28,7 +26,7 @@ public class HomeController : Controller
         catch (Exception ex)
         {
             _logger.LogError(LoggerMsj.MensajeEx(ex, "Error al acceder al método Index del controlador Home."));
-            return BadRequest();
+            return StatusCode(500);
         }
     }
 }

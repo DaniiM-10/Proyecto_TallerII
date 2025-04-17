@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using Proyecto_TallerII.Models;
 namespace Proyecto_TallerII.ViewModels;
 public class CambiarEstadoViewModel

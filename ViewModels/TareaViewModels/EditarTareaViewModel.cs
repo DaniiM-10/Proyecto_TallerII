@@ -1,11 +1,11 @@
 using System.ComponentModel.DataAnnotations;
-using Proyecto_TallerII.Models;
 namespace Proyecto_TallerII.ViewModels;
 
 public class EditarTareaViewModel
 {
     public int IdTarea { get; set; }
     public int IdTablero { get; set; }
+    public int IdUsuarioPropietario { get; set; }
     public int? IdUsuarioAsignado { get; set; }
 
     [Required(ErrorMessage = "El nombre de la tarea es requerido.")]

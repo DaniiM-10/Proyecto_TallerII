@@ -4,8 +4,8 @@ namespace Proyecto_TallerII.ViewModels;
 
 public class CrearTareaViewModel
 {
-    public int IdTablero { get; set; } // el id del tablero sera un campo oculto
-    public int? IdPropietarioTablero { get; set; } // el id del tablero sera un campo oculto
+    public int IdTablero { get; set; }
+    public int? IdPropietarioTablero { get; set; }
 
     [Required(ErrorMessage = "El nombre de la tarea es requerido.")]
     public string NombreTarea { get; set; }

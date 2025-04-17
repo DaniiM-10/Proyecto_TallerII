@@ -11,7 +11,7 @@ public interface ITareaRepository
     List<Tarea> ListarTareasSinAsignarAdmin();
     Tarea ObtenerTareaPorId(int idTarea);
     bool ExisteTarea(int idTablero, int idTarea, string nombreTarea);
-    void CambiarPropietarioTarea(int idUsuario, int idTarea);
+    void CambiarPropietarioTarea(int? idUsuario, int idTarea);
     void CambiarEstadoTarea(int idTarea, int codigoEstado, string colorEstado);
     int CantidadDeTareas(int idTablero);
     int CantidadDeTareasRealizadas(int idTablero);
