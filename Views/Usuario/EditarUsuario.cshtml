@@ -1,10 +1,22 @@
-@using Proyecto_TallerII.Models
-@using Proyecto_TallerII.Repositories
+@using Proyecto_TallerII.Helpers
 @using Proyecto_TallerII.ViewModels
 @model EditarUsuarioViewModel
 
 <section class="w-full flex flex-col justify-center items-center flex-grow min-h-[calc(100vh-20vh)]">
     <div class="flex flex-col justify-center items-center w-full flex-grow">
+        @if (TempData["Mensaje"] != null)
+        {
+            <div class="p-4 my-1 text-white rounded-xl bg-[#8c52ff] font-normal" role="alert">
+                <div class="flex">
+                    <span class="font-semibold mr-2">@TempData["Mensaje"]</span>
+                    <button class="pl-3 ml-auto" data-dismiss="alert">
+                        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M0.833497 9.16659L9.16683 0.833253M9.16683 9.16658L0.833496 0.833252" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        }
         <h1 class="text-[#3b3b3b] text-[40px] font-bold mb-8">Editar Usuario: <span
                 class="text-[#8c52ff]">@Model.NombreUsuario</span></h1>
         <form asp-controller="Usuario" asp-action="EditarUsuario" method="post" class="space-y-8 w-full max-w-[400px]">
@@ -22,7 +34,7 @@
                     class="form-control text-[#3b3b3b] text-[18px] font-bold placeholder-[#4d4d4d] placeholder:text-[18px] placeholder:font-bold bg-[#f2f2f2] border-2 px-4 border-[#8c52ff] rounded-[18px] w-full h-[50px] focus:outline-none focus:border-[#8c52ff] focus:bg-[#f2f2f2] focus:placeholder-[#3b3b3b] focus:text-[#3b3b3b] focus:font-bold focus:text-[18px]"
                     placeholder="Contraseña..." />
             </div>
-            @if (Autorizaciones.EsAdmin(ViewContext.HttpContext))
+            @if (AuthHelper.EsAdmin(ViewContext.HttpContext))
             {
                 <div class="mb-4 relative">
                     <select asp-for="@Model.RolUsuario"

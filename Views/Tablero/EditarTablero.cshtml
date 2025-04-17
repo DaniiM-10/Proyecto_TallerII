@@ -1,44 +1,55 @@
-@using Proyecto_TallerII.Models
-@using Proyecto_TallerII.Repositories
+@using Proyecto_TallerII.Helpers
 @using Proyecto_TallerII.ViewModels
 @model EditarTableroViewModel
 @{
-    var esAdmin = Autorizaciones.EsAdmin(ViewContext.HttpContext);
-    var IdUsuarioLogueado = Autorizaciones.ObtenerIdUsuario(ViewContext.HttpContext);
+    var esAdmin = AuthHelper.EsAdmin(ViewContext.HttpContext);
+    var IdUsuarioLogueado = AuthHelper.ObtenerIdUsuario(ViewContext.HttpContext);
 }
 
 <section class="w-full flex flex-col justify-center items-center flex-grow min-h-[calc(100vh-20vh)]">
     <div class="flex flex-col justify-center items-center w-full flex-grow">
+        @if (TempData["Mensaje"] != null)
+        {
+            <div class="p-4 my-1 text-white rounded-xl bg-[#8c52ff] font-normal" role="alert">
+                <div class="flex">
+                    <span class="font-semibold mr-2">@TempData["Mensaje"]</span>
+                    <button class="pl-3 ml-auto" data-dismiss="alert">
+                        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M0.833497 9.16659L9.16683 0.833253M9.16683 9.16658L0.833496 0.833252" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        }
         <h1 class="text-[#3b3b3b] text-[40px] font-bold mb-8">Editar Tablero: <span class="text-[#8c52ff]">@Model.NombreDeTablero</span></h1>
         <form asp-controller="Tablero" asp-action="EditarTablero" method="post" class="space-y-8 w-full max-w-[400px]">
-            <input asp-for="@Model.IdTablero" type="hidden" />
-            <input asp-for="@Model.IdUsuarioPropietarioAnterior" value="@Model.IdUsuarioPropietarioAnterior" type="hidden" />
+            <input asp-for="IdTablero" type="hidden" />
+            @if(!esAdmin)
+            {
+                <input asp-for="IdUsuarioPropietario" type="hidden" />
+            }
             <div class="mb-4 relative">
-                <input type="text" asp-for="@Model.NombreDeTablero"
+                <input type="text" asp-for="NombreDeTablero"
                     class="form-control text-[#3b3b3b] text-[18px] font-bold placeholder-[#4d4d4d] placeholder:text-[18px] placeholder:font-bold bg-[#f2f2f2] border-2 px-4 border-[#8c52ff] rounded-[18px] w-full h-[50px] focus:outline-none focus:border-[#8c52ff] focus:bg-[#f2f2f2] focus:placeholder-[#3b3b3b] focus:text-[#3b3b3b] focus:font-bold focus:text-[18px]"
                     placeholder="Nombre..." />
-                <span asp-validation-for="@Model.NombreDeTablero"
+                <span asp-validation-for="NombreDeTablero"
                     class="absolute left-0 top-full mt-1 ml-2 text-[#CC7A00] w-full block text-sm font-bold">
                 </span>
             </div>
             <div class="mb-4 relative">
-                <textarea asp-for="@Model.DescripcionDeTablero"
+                <textarea asp-for="DescripcionDeTablero"
                     class="form-control text-[#3b3b3b] text-[18px] font-bold placeholder-[#4d4d4d] placeholder:text-[18px] placeholder:font-bold bg-[#f2f2f2] border-2 pt-2 px-4 border-[#8c52ff] rounded-[18px] w-full h-[160px] focus:outline-none focus:border-[#8c52ff] focus:bg-[#f2f2f2] focus:placeholder-[#3b3b3b] focus:text-[#3b3b3b] focus:font-bold focus:text-[18px]"
                     placeholder="Descripcion...">
                 </textarea>
-                <span asp-validation-for="@Model.DescripcionDeTablero"
+                <span asp-validation-for="DescripcionDeTablero"
                     class="absolute left-0 top-full mt-1 ml-2 text-[#CC7A00] w-full block text-sm font-bold">
                 </span>
             </div>
             @if(esAdmin)
             {
                 <div class="mb-4 relative">
-                    <select asp-for="@Model.IdUsuarioPropietario"
+                    <select asp-for="IdUsuarioPropietario"
                         class="form-control text-[#3b3b3b] text-[18px] font-bold placeholder-[#4d4d4d] placeholder:text-[18px] placeholder:font-bold bg-[#f2f2f2] border-2 px-4 border-[#8c52ff] rounded-[18px] w-full h-[50px] focus:outline-none focus:border-[#8c52ff] focus:bg-[#f2f2f2] focus:placeholder-[#3b3b3b] focus:text-[#3b3b3b] focus:font-bold focus:text-[18px]">
-                        @if(Model.IdUsuarioPropietarioAnterior == null)
-                        {
-                            <option>Seleccione un Usuario...</option>
-                        }
                         @if (Model.ListadoUsuarios != null)
                         {
                             foreach (var usuario in Model.ListadoUsuarios!)

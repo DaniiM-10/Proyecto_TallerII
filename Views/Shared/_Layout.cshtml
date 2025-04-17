@@ -1,4 +1,4 @@
-﻿@using Proyecto_TallerII.Repositories
+﻿@using Proyecto_TallerII.Helpers
 
 <!DOCTYPE html>
 <html lang="en" class="h-full m-0">
@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Proyecto_TallerII.styles.css" asp-append-version="true" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/pagedone@1.2.2/src/css/pagedone.css " rel="stylesheet"/>
 </head>
 <body class="h-full m-0 @(ViewContext.RouteData.Values["controller"]?.ToString() == "Tarea" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "overflow-hidden" : "")">
     <header>
@@ -20,24 +21,24 @@
             </div>
             @if(((ViewContext.RouteData.Values["controller"]?.ToString() == "Tablero" && ViewContext.RouteData.Values["action"]?.ToString() == "Index") ||
                 (ViewContext.RouteData.Values["controller"]?.ToString() == "Usuario" && ViewContext.RouteData.Values["action"]?.ToString() == "EditarUsuario"))
-                && Autorizaciones.EsAdmin(ViewContext.HttpContext))
+                && AuthHelper.EsAdmin(ViewContext.HttpContext))
             {
                 <div class="flex space-x-4">
                     <a asp-controller="Usuario" asp-action="CrearUsuario" class="border-2 border-[#8c52ff] rounded-[15px] text-[#3b3b3b] font-bold underline decoration-[1.5px] px-2 hover:bg-[#8c52ff] hover:text-white transition-colors duration-300">Crear Usuario</a>
                     <a asp-controller="Usuario" asp-action="Index" class="border-2 border-[#8c52ff] rounded-[15px] text-[#3b3b3b] font-bold underline decoration-[1.5px] px-2 hover:bg-[#8c52ff] hover:text-white transition-colors duration-300">Usuarios</a>
                 </div>
             }
-            @if(Autorizaciones.EstaAutenticado(ViewContext.HttpContext))
+            @if(AuthHelper.EstaAutenticado(ViewContext.HttpContext))
             {
                 <div class="flex items-center gap-2">
-                    @if(Autorizaciones.EsAdmin(ViewContext.HttpContext))
+                    @if(AuthHelper.EsAdmin(ViewContext.HttpContext))
                     {
                         <svg fill="#E6BE00" height="22px" width="22px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 277.366 277.366" xml:space="preserve" stroke="#E6BE00"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g> <path d="M257.799,55.704c-7.706-3.866-17.016-2.36-23.111,3.734l-39.2,39.201l-38.526-86.757C153.753,4.657,146.589,0,138.683,0 s-15.07,4.657-18.278,11.883L81.878,98.64l-39.2-39.201c-6.094-6.093-15.405-7.6-23.111-3.733 C11.864,59.569,7.502,67.935,8.745,76.463l17.879,122.785c1.431,9.829,9.858,17.118,19.791,17.118h184.536 c9.933,0,18.36-7.289,19.791-17.118l17.88-122.786C269.864,67.934,265.502,59.568,257.799,55.704z"></path> <path d="M230.951,237.366H46.415c-11.046,0-20,8.954-20,20s8.954,20,20,20h184.536c11.046,0,20-8.954,20-20 S241.997,237.366,230.951,237.366z"></path> </g> </g></svg>
                     } else {
                         <svg width="22px" height="22px" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <circle cx="8" cy="8" r="8" fill="#6cbd4a"></circle> </g></svg>
                     }
-                    <a asp-controller="Usuario" asp-action="Perfil" asp-route-idUsuario=@Autorizaciones.ObtenerIdUsuario(ViewContext.HttpContext)
-                    class="text-[#8c52ff] text-[16px] font-bold underline decoration-[1.5px]">@Autorizaciones.ObtenerNombreDeUsuario(ViewContext.HttpContext)</a>
+                    <a asp-controller="Usuario" asp-action="Perfil" asp-route-idUsuario=@AuthHelper.ObtenerIdUsuario(ViewContext.HttpContext)
+                    class="text-[#8c52ff] text-[16px] font-bold underline decoration-[1.5px]">@AuthHelper.ObtenerNombreDeUsuario(ViewContext.HttpContext)</a>
                     <a href="@Url.Action("Logout", "Login")">
                         <svg width="24px" height="24px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#8c52ff"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round" stroke="#8c52ff" stroke-width="0.384"></g><g id="SVGRepo_iconCarrier"><path stroke="#8c52ff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" d="m19 12-4-4m4 4-4 4m4-4H9m5 9a9 9 0 1 1 0-18"></path></g></svg>
                     </a>
@@ -50,6 +51,8 @@
             @RenderBody()
         </main>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/pagedone@1.2.2/src/js/pagedone.js"></script>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

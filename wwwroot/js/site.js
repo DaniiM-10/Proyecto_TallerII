@@ -1,7 +1,7 @@
 ﻿// Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
 // for details on configuring this project to bundle and minify static web assets.
 
-// Modal
+// Select de las tareas
 document.addEventListener('DOMContentLoaded', () => {
     const estados = [
         { value: 1, text: 'ToDo'},
@@ -9,14 +9,14 @@ document.addEventListener('DOMContentLoaded', () => {
         { value: 3, text: 'Review'},
         { value: 4, text: 'Done'},
     ];
-
+    
     document.querySelectorAll('[data-estado-de-tarea]').forEach(container => {
         const estadoDeTarea = container.dataset.estadoDeTarea;
         
         const select = container.nextElementSibling.querySelector('#estado-tarea-select');
         if (select) {
             select.innerHTML = '';
-
+            
             estados.forEach(estado => {
                 const option = document.createElement('option');
                 option.value = estado.value;
@@ -30,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+// Modal
 function openModal(autorizarEdyEl, nombreTarea, descripcion, usuarioAsignado, nombreTablero, idTarea, idTablero) {
     document.getElementById('modal-nombre-tarea').innerText = nombreTarea;
     document.getElementById('modal-nombre-tablero').innerText = `( ${nombreTablero} )`;
@@ -52,6 +53,7 @@ function closeModal() {
     document.getElementById('tareaModal').classList.add('hidden');
 }
 
+// Acordeon del perfil
 function toggleAccordion(index) {
     const content = document.getElementById(`content-${index}`);
     const icon = document.getElementById(`icon-${index}`);

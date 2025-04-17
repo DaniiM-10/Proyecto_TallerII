@@ -1,9 +1,9 @@
-@using Proyecto_TallerII.Repositories
+@using Proyecto_TallerII.Helpers
 @using Proyecto_TallerII.ViewModels
 @model ListaTareasViewModel
 @{
-    var esAdmin = Autorizaciones.EsAdmin(ViewContext.HttpContext);
-    var idUsuarioLogueado = Autorizaciones.ObtenerIdUsuario(ViewContext.HttpContext);
+    var esAdmin = AuthHelper.EsAdmin(ViewContext.HttpContext);
+    var idUsuarioLogueado = AuthHelper.ObtenerIdUsuario(ViewContext.HttpContext);
 }
 
 <section 
@@ -17,15 +17,36 @@
         >@Model.NombreTablero</h1>
         @if(Model.IdUsuarioPropietario == idUsuarioLogueado || esAdmin)
         {
-            <a asp-controller="Tablero" asp-action="EditarTablero" asp-route-idTablero="@Model.IdTablero" asp-route-idUsuarioProp="@Model.IdUsuarioPropietario"
+            <a asp-controller="Tablero" asp-action="EditarTablero" asp-route-idTablero="@Model.IdTablero" 
                 class="border-2 border-[#8c52ff] rounded-[15px] text-[#3b3b3b] font-bold underline decoration-[1.5px] px-3 hover:bg-[#8c52ff] hover:text-white transition-colors duration-300">
             Editar</a>
-            <a asp-controller="Tablero" asp-action="EliminarTablero" asp-route-idTablero="@Model.IdTablero" asp-route-idUsuarioProp="@Model.IdUsuarioPropietario"
-                class="text-[#3b3b3b] font-bold underline decoration-[1.5px] transition-colors duration-200 hover:text-[#8c52ff]"
-                onclick="return confirm('¿Estas seguro que quieres eliminar el tablero: @(Model.NombreTablero)?')"
-            >Eliminar</a>
+            @if(Model.ListaTareasVM.Count() == 0)
+            {
+                <a asp-controller="Tablero" asp-action="EliminarTablero" asp-route-idTablero="@Model.IdTablero" asp-route-idUsuarioProp="@Model.IdUsuarioPropietario"
+                    class="text-[#3b3b3b] font-bold underline decoration-[1.5px] transition-colors duration-200 hover:text-[#8c52ff]"
+                    onclick="return confirm('¿Estas seguro que quieres eliminar el tablero: @(Model.NombreTablero)?')"
+                >Eliminar</a>
+            }
         }
     </div>
+    <div class="flex justify-center items-center">
+        <p class="text-[#8c52ff] text-xl font-bold">
+            (Usuario Propietario: <span class="text-[#3b3b3b]">@Model.NombreUsuarioPropietario</span>)
+        </p>
+    </div>
+    @if (TempData["Mensaje"] != null)
+    {
+        <div class="p-4 my-1 text-white rounded-xl bg-[#8c52ff] font-normal" role="alert">
+            <div class="flex">
+                <span class="font-semibold mr-2">@TempData["Mensaje"]</span>
+                <button class="pl-3 ml-auto" data-dismiss="alert">
+                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M0.833497 9.16659L9.16683 0.833253M9.16683 9.16658L0.833496 0.833252" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    }
     <div class="flex">
         <!-- Contenedor TODO -->
         <div class="w-1/4 p-4">
@@ -49,7 +70,7 @@
                                     <p 
                                         class="text-[#3b3b3b] font-bold text-xl underline cursor-pointer hover:text-[#8c52ff]"
                                         onclick="openModal(
-                                            (@esAdmin.ToString().ToLower() || @(Model.IdUsuarioPropietario??0) == @idUsuarioLogueado),
+                                            (@esAdmin.ToString().ToLower() || @(Model.IdUsuarioPropietario) == @idUsuarioLogueado),
                                             '@todo.NombreTareaVM', 
                                             '@todo.DescripcionTareaVM', 
                                             '@todo.NombreUsuarioAsignadoVM', 
@@ -61,18 +82,18 @@
                                     </p>
                                     @if(esAdmin || Model.IdUsuarioPropietario == idUsuarioLogueado)
                                     {
-                                        <figure 
-                                            class="flex pl-2 pt-1"
-                                        >
-                                            <a asp-controller="Tarea" asp-action="AsignarCambiarUsuarioTarea" asp-route-idTablero="@todo.IdTableroVM" asp-route-idTarea="@todo.IdTareaVM">
-                                            @if(todo.IdUsuarioAsignadoVM > 0)
-                                            {
-                                                <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#8c52ff"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M11 14C7.13401 14 4 17.134 4 21H10.5M18.5 20.2361C17.9692 20.7111 17.2684 21 16.5 21C14.8431 21 13.5 19.6569 13.5 18C13.5 16.3431 14.8431 15 16.5 15C17.8062 15 18.9175 15.8348 19.3293 17M20 14.5V17.5H17M15 7C15 9.20914 13.2091 11 11 11C8.79086 11 7 9.20914 7 7C7 4.79086 8.79086 3 11 3C13.2091 3 15 4.79086 15 7Z" stroke="#8c52ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
-                                            } else {
-                                                <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#6cbd4a"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M20 18L14 18M17 15V21M4 21C4 17.134 7.13401 14 11 14C11.695 14 12.3663 14.1013 13 14.2899M15 7C15 9.20914 13.2091 11 11 11C8.79086 11 7 9.20914 7 7C7 4.79086 8.79086 3 11 3C13.2091 3 15 4.79086 15 7Z" stroke="#6cbd4a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
-                                            }
-                                            </a>
-                                        </figure>
+                                        <a asp-controller="Tarea" asp-action="AsignarCambiarUsuarioTarea" asp-route-idTablero="@todo.IdTableroVM" asp-route-idTarea="@todo.IdTareaVM">
+                                            <figure 
+                                                class="flex pl-2 pt-1"
+                                            >
+                                                @if(todo.IdUsuarioAsignadoVM > 0)
+                                                {
+                                                    <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#8c52ff"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M11 14C7.13401 14 4 17.134 4 21H10.5M18.5 20.2361C17.9692 20.7111 17.2684 21 16.5 21C14.8431 21 13.5 19.6569 13.5 18C13.5 16.3431 14.8431 15 16.5 15C17.8062 15 18.9175 15.8348 19.3293 17M20 14.5V17.5H17M15 7C15 9.20914 13.2091 11 11 11C8.79086 11 7 9.20914 7 7C7 4.79086 8.79086 3 11 3C13.2091 3 15 4.79086 15 7Z" stroke="#8c52ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+                                                } else {
+                                                    <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#6cbd4a"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M20 18L14 18M17 15V21M4 21C4 17.134 7.13401 14 11 14C11.695 14 12.3663 14.1013 13 14.2899M15 7C15 9.20914 13.2091 11 11 11C8.79086 11 7 9.20914 7 7C7 4.79086 8.79086 3 11 3C13.2091 3 15 4.79086 15 7Z" stroke="#6cbd4a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+                                                }
+                                            </figure>
+                                        </a>
                                     }
                                 </div>
                                 <div 
@@ -162,7 +183,7 @@
                                     <p 
                                         class="text-[#3b3b3b] font-bold text-xl underline cursor-pointer hover:text-[#8c52ff]"
                                         onclick="openModal(
-                                            (@esAdmin.ToString().ToLower() || @(Model.IdUsuarioPropietario??0) == @idUsuarioLogueado),
+                                            (@esAdmin.ToString().ToLower() || @(Model.IdUsuarioPropietario) == @idUsuarioLogueado),
                                             '@doing.NombreTareaVM', 
                                             '@doing.DescripcionTareaVM', 
                                             '@doing.NombreUsuarioAsignadoVM', 
@@ -179,7 +200,12 @@
                                             <figure 
                                                 class="flex pl-2 pt-1"
                                             >
-                                                <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#8c52ff"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M11 14C7.13401 14 4 17.134 4 21H10.5M18.5 20.2361C17.9692 20.7111 17.2684 21 16.5 21C14.8431 21 13.5 19.6569 13.5 18C13.5 16.3431 14.8431 15 16.5 15C17.8062 15 18.9175 15.8348 19.3293 17M20 14.5V17.5H17M15 7C15 9.20914 13.2091 11 11 11C8.79086 11 7 9.20914 7 7C7 4.79086 8.79086 3 11 3C13.2091 3 15 4.79086 15 7Z" stroke="#8c52ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+                                                @if(doing.IdUsuarioAsignadoVM > 0)
+                                                {
+                                                    <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#8c52ff"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M11 14C7.13401 14 4 17.134 4 21H10.5M18.5 20.2361C17.9692 20.7111 17.2684 21 16.5 21C14.8431 21 13.5 19.6569 13.5 18C13.5 16.3431 14.8431 15 16.5 15C17.8062 15 18.9175 15.8348 19.3293 17M20 14.5V17.5H17M15 7C15 9.20914 13.2091 11 11 11C8.79086 11 7 9.20914 7 7C7 4.79086 8.79086 3 11 3C13.2091 3 15 4.79086 15 7Z" stroke="#8c52ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+                                                } else {
+                                                    <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#6cbd4a"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M20 18L14 18M17 15V21M4 21C4 17.134 7.13401 14 11 14C11.695 14 12.3663 14.1013 13 14.2899M15 7C15 9.20914 13.2091 11 11 11C8.79086 11 7 9.20914 7 7C7 4.79086 8.79086 3 11 3C13.2091 3 15 4.79086 15 7Z" stroke="#6cbd4a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+                                                }
                                             </figure>
                                         </a>
                                     }
@@ -263,7 +289,7 @@
                                     <p 
                                         class="text-[#3b3b3b] font-bold text-xl underline cursor-pointer hover:text-[#8c52ff]"
                                         onclick="openModal(
-                                            (@esAdmin.ToString().ToLower() || @(Model.IdUsuarioPropietario??0) == @idUsuarioLogueado),
+                                            (@esAdmin.ToString().ToLower() || @(Model.IdUsuarioPropietario) == @idUsuarioLogueado),
                                             '@review.NombreTareaVM', 
                                             '@review.DescripcionTareaVM', 
                                             '@review.NombreUsuarioAsignadoVM', 
@@ -279,7 +305,12 @@
                                             <figure 
                                                 class="flex pl-2 pt-1"
                                             >
-                                                <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#8c52ff"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M11 14C7.13401 14 4 17.134 4 21H10.5M18.5 20.2361C17.9692 20.7111 17.2684 21 16.5 21C14.8431 21 13.5 19.6569 13.5 18C13.5 16.3431 14.8431 15 16.5 15C17.8062 15 18.9175 15.8348 19.3293 17M20 14.5V17.5H17M15 7C15 9.20914 13.2091 11 11 11C8.79086 11 7 9.20914 7 7C7 4.79086 8.79086 3 11 3C13.2091 3 15 4.79086 15 7Z" stroke="#8c52ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+                                                @if(review.IdUsuarioAsignadoVM > 0)
+                                                {
+                                                    <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#8c52ff"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M11 14C7.13401 14 4 17.134 4 21H10.5M18.5 20.2361C17.9692 20.7111 17.2684 21 16.5 21C14.8431 21 13.5 19.6569 13.5 18C13.5 16.3431 14.8431 15 16.5 15C17.8062 15 18.9175 15.8348 19.3293 17M20 14.5V17.5H17M15 7C15 9.20914 13.2091 11 11 11C8.79086 11 7 9.20914 7 7C7 4.79086 8.79086 3 11 3C13.2091 3 15 4.79086 15 7Z" stroke="#8c52ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+                                                } else {
+                                                    <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#6cbd4a"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M20 18L14 18M17 15V21M4 21C4 17.134 7.13401 14 11 14C11.695 14 12.3663 14.1013 13 14.2899M15 7C15 9.20914 13.2091 11 11 11C8.79086 11 7 9.20914 7 7C7 4.79086 8.79086 3 11 3C13.2091 3 15 4.79086 15 7Z" stroke="#6cbd4a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+                                                }
                                             </figure>
                                         </a>
                                     }
@@ -315,7 +346,7 @@
                                                 class="sr-only"
                                             >Estado de la Tarea</label>
                                             <select name="EstadoTarea" id="estado-tarea-select"
-                                                class="form-control text-[#3b3b3b] text-[18px] font-bold mt-2 placeholder-[#4d4d4d] placeholder:text-[18px] placeholder:font-bold bg-[#f2f2f2] border-2 px-4 border-[#8c52ff] rounded-[18px] w-full h-[30px] focus:outline-none focus:border-[#8c52ff] focus:bg-[#f2f2f2] focus:placeholder-[#3b3b3b] focus:text-[#3b3b3b] focus:font-bold focus:text-[18px]">
+                                                class="form-control text-[#3b3b3b] text-[18px] font-bold mt-2 pl-2 placeholder-[#4d4d4d] placeholder:text-[18px] placeholder:font-bold bg-[#f2f2f2] border-2 px-4 border-[#8c52ff] rounded-[18px] w-full h-[30px] focus:outline-none focus:border-[#8c52ff] focus:bg-[#f2f2f2] focus:placeholder-[#3b3b3b] focus:text-[#3b3b3b] focus:font-bold focus:text-[18px]">
                                             </select>
                                             <span class="text-[#CC7A00] w-full block px-3"></span>
                                         </div>
@@ -362,7 +393,7 @@
                                     <p 
                                         class="text-[#3b3b3b] font-bold text-xl underline cursor-pointer hover:text-[#8c52ff]"
                                         onclick="openModal(
-                                            (@esAdmin.ToString().ToLower() || @(Model.IdUsuarioPropietario??0) == @idUsuarioLogueado),
+                                            (@esAdmin.ToString().ToLower() || @(Model.IdUsuarioPropietario) == @idUsuarioLogueado),
                                             '@done.NombreTareaVM', 
                                             '@done.DescripcionTareaVM', 
                                             '@done.NombreUsuarioAsignadoVM', 
@@ -378,7 +409,12 @@
                                             <figure 
                                                 class="flex pl-2 pt-1"
                                             >
-                                                <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#8c52ff"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M11 14C7.13401 14 4 17.134 4 21H10.5M18.5 20.2361C17.9692 20.7111 17.2684 21 16.5 21C14.8431 21 13.5 19.6569 13.5 18C13.5 16.3431 14.8431 15 16.5 15C17.8062 15 18.9175 15.8348 19.3293 17M20 14.5V17.5H17M15 7C15 9.20914 13.2091 11 11 11C8.79086 11 7 9.20914 7 7C7 4.79086 8.79086 3 11 3C13.2091 3 15 4.79086 15 7Z" stroke="#8c52ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+                                                @if(done.IdUsuarioAsignadoVM > 0)
+                                                {
+                                                    <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#8c52ff"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M11 14C7.13401 14 4 17.134 4 21H10.5M18.5 20.2361C17.9692 20.7111 17.2684 21 16.5 21C14.8431 21 13.5 19.6569 13.5 18C13.5 16.3431 14.8431 15 16.5 15C17.8062 15 18.9175 15.8348 19.3293 17M20 14.5V17.5H17M15 7C15 9.20914 13.2091 11 11 11C8.79086 11 7 9.20914 7 7C7 4.79086 8.79086 3 11 3C13.2091 3 15 4.79086 15 7Z" stroke="#8c52ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+                                                } else {
+                                                    <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#6cbd4a"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M20 18L14 18M17 15V21M4 21C4 17.134 7.13401 14 11 14C11.695 14 12.3663 14.1013 13 14.2899M15 7C15 9.20914 13.2091 11 11 11C8.79086 11 7 9.20914 7 7C7 4.79086 8.79086 3 11 3C13.2091 3 15 4.79086 15 7Z" stroke="#6cbd4a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+                                                }
                                             </figure>
                                         </a>
                                     }
@@ -488,11 +524,11 @@
                 <div 
                     class="flex justify-between items-center">
                     <div id="modal-btns" class="flex gap-2">
-                        <a id="modal-editar" asp-controller="Tarea" asp-action="EditarTarea"
+                        <a id="modal-editar" 
                             class="border-2 border-[#8c52ff] rounded-[15px] text-[#3b3b3b] font-bold underline decoration-[1.5px] px-3 hover:bg-[#8c52ff] hover:text-white transition-colors duration-300">
                             Editar
                         </a>
-                        <a id="modal-eliminar" asp-controller="Tarea" asp-action="EliminarTarea"
+                        <a id="modal-eliminar" 
                             class="text-[#3b3b3b] font-bold underline decoration-[1.5px] mt-[3px] transition-colors duration-200 hover:text-[#8c52ff]" 
                             onclick="return confirm('¿Estas seguro que quieres eliminar esta tarea?')">
                             Eliminar
